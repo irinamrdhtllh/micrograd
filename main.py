@@ -15,8 +15,8 @@ class Value:
 
     def __add__(self, other):
         def _backward():
-            self.grad = 1.0 * output.grad
-            other.grad = 1.0 * output.grad
+            self.grad += 1.0 * output.grad
+            other.grad += 1.0 * output.grad
 
         output = Value(self.data + other.data, (self, other), "+")
         output._backward = _backward
@@ -25,8 +25,8 @@ class Value:
 
     def __mul__(self, other):
         def _backward():
-            self.grad = other.data * output.grad
-            other.grad = self.data * output.grad
+            self.grad += other.data * output.grad
+            other.grad += self.data * output.grad
 
         output = Value(self.data * other.data, (self, other), "*")
         output._backward = _backward
@@ -35,7 +35,7 @@ class Value:
 
     def tanh(self):
         def _backward():
-            self.grad = (1 - tanh**2) * output.grad
+            self.grad += (1 - tanh**2) * output.grad
 
         x = self.data
         tanh = (math.exp(2 * x) - 1) / (math.exp(2 * x) + 1)
