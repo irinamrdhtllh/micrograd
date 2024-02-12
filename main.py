@@ -1,6 +1,16 @@
 import math
 
 
+def topological_sort(value):
+    if value not in visited:
+        visited.add(value)
+
+        for child in value._prev:
+            topological_sort(child)
+
+        stack.append(value)
+
+
 class Value:
     def __init__(self, data, _children=(), _operation="", label=""):
         self.data = data
@@ -64,13 +74,17 @@ if __name__ == "__main__":
     n = xw + b
     o = n.tanh()
 
-    # Backward pass
+    stack = []
+    visited = set()
+    topological_sort(o)
+    print(stack)
+
+    # Set the gradient of the output
     o.grad = 1
-    o._backward()
-    n._backward()
-    xw._backward()
-    x2w2._backward()
-    x1w1._backward()
+
+    # Backward pass
+    for node in reversed(stack):
+        node._backward()
 
     print(f"Gradient of o: {o.grad}")
     print(f"Gradient of n: {n.grad}")
