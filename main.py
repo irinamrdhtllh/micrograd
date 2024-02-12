@@ -1,16 +1,6 @@
 import math
 
 
-def topological_sort(value):
-    if value not in visited:
-        visited.add(value)
-
-        for child in value._prev:
-            topological_sort(child)
-
-        stack.append(value)
-
-
 class Value:
     def __init__(self, data, _children=(), _operation="", label=""):
         self.data = data
@@ -54,6 +44,25 @@ class Value:
 
         return output
 
+    def backward(self):
+        def topological_sort(value):
+            if value not in visited:
+                visited.add(value)
+
+                for child in value._prev:
+                    topological_sort(child)
+
+                stack.append(value)
+
+        stack = []
+        visited = set()
+        topological_sort(self)
+
+        # Backward pass
+        self.grad = 1.0
+        for node in reversed(stack):
+            node._backward()
+
 
 if __name__ == "__main__":
     # The neuron's inputs
@@ -74,17 +83,8 @@ if __name__ == "__main__":
     n = xw + b
     o = n.tanh()
 
-    stack = []
-    visited = set()
-    topological_sort(o)
-    print(stack)
-
-    # Set the gradient of the output
-    o.grad = 1
-
     # Backward pass
-    for node in reversed(stack):
-        node._backward()
+    o.backward()
 
     print(f"Gradient of o: {o.grad}")
     print(f"Gradient of n: {n.grad}")
