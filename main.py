@@ -24,6 +24,12 @@ class Value:
 
         return output
 
+    def __neg__(self):
+        return self * -1
+
+    def __sub__(self, other):
+        return self + (-other)
+
     def __mul__(self, other):
         def _backward():
             self.grad += other.data * output.grad
@@ -37,6 +43,29 @@ class Value:
 
     def __rmul__(self, other):
         return self * other
+
+    def __pow__(self, other):
+        def _backward():
+            self.grad = other * (self.data ** (other - 1)) * output.grad
+
+        assert isinstance(other, (int, float)), "Only support int or float powers"
+        output = Value(self.data**other, (self,), f"**{other}")
+        output._backward = _backward
+
+        return output
+
+    def __truediv__(self, other):
+        return self * other**-1
+
+    def exp(self):
+        def _backward():
+            self.grad += output.data * output.grad
+
+        x = self.data
+        output = Value(math.exp(x), (self,), "exp")
+        output._backward = _backward
+
+        return output
 
     def tanh(self):
         def _backward():
@@ -86,7 +115,8 @@ if __name__ == "__main__":
     x2w2 = x2 * w2
     xw = x1w1 + x2w2
     n = xw + b
-    o = n.tanh()
+    exp = (2 * n).exp()
+    o = (exp - 1) / (exp + 1)
 
     # Backward pass
     o.backward()
