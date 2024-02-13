@@ -15,4 +15,4 @@ loss = sum(
 
 loss.backward()
 
-print(nn.layers[0].neurons[0].weights[0].grad)
+print(nn.parameters())
