@@ -18,6 +18,7 @@ class Value:
             self.grad += 1.0 * output.grad
             other.grad += 1.0 * output.grad
 
+        other = other if isinstance(other, Value) else Value(other)
         output = Value(self.data + other.data, (self, other), "+")
         output._backward = _backward
 
@@ -28,10 +29,14 @@ class Value:
             self.grad += other.data * output.grad
             other.grad += self.data * output.grad
 
+        other = other if isinstance(other, Value) else Value(other)
         output = Value(self.data * other.data, (self, other), "*")
         output._backward = _backward
 
         return output
+
+    def __rmul__(self, other):
+        return self * other
 
     def tanh(self):
         def _backward():
